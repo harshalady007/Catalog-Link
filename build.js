@@ -65,7 +65,7 @@ function setProductImage({ id, label, expectedText, imageUrl }) {
   { id: 31, label: "Sulo 120 Ltr Without pedal", expectedText: "Sulo 120 Ltr Without pedal", imageUrl: "public/products/image1005.png" },
   { id: 34, label: "Sulo 360 Ltr", expectedText: "Sulo 360 Ltr", imageUrl: "public/products/image1006.png" },
   { id: 36, label: "Plastic Gogic Bin 120 Ltr without pedal", expectedText: "Plastic Gogic Bin 120 Ltr without pedal", imageUrl: "public/products/image1001.png" },
-  { id: 55, label: "Kava Swing Top", expectedText: "Kava Swing Top", imageUrl: "public/products/image21.png" },
+  { id: 55, label: "Kava Swing Top", expectedText: "Kava Swing Top", imageUrl: "public/products/image1022.png" },
   { id: 56, label: "Laksha I", expectedText: "Laksha I", imageUrl: "public/products/image1023.png" },
 ].forEach(setProductImage);
 
@@ -155,7 +155,7 @@ function removeProductById({ id, label, expectedText }) {
 
 const kavaEntry = getProductEntry(55, "Kava Swing Top")?.entry || "";
 const lakshaEntry = getProductEntry(56, "Laksha I")?.entry || "";
-if (!kavaEntry.includes("imageUrl:\\\"public/products/image21.png\\\"")) {
+if (!kavaEntry.includes("imageUrl:\\\"public/products/image1022.png\\\"")) {
   throw new Error("Kava Swing Top image cleanup failed.");
 }
 if (!lakshaEntry.includes("imageUrl:\\\"public/products/image1023.png\\\"")) {

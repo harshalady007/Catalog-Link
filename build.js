@@ -28,3 +28,34 @@ for (const target of targets) {
   fs.writeFileSync(outputPath, entry.getData());
   console.log(`Extracted ${target}`);
 }
+
+const indexPath = path.join(__dirname, "public", "index.html");
+let html = fs.readFileSync(indexPath, "utf8");
+
+const productImageFixes = [
+  {
+    label: "Sulo 120 Ltr Without pedal",
+    pattern: /(\{ id:31, name:\\"Sulo 120 Ltr Without pedal\\"[^}]*?imageUrl:\\")\\"/,
+    replacement: '$1public/products/image1005.png\\"',
+  },
+  {
+    label: "Sulo 360 Ltr",
+    pattern: /(\{ id:34, name:\\"Sulo 360 Ltr\\"[^}]*?imageUrl:\\")\\"/,
+    replacement: '$1public/products/image1006.png\\"',
+  },
+  {
+    label: "Laksha I",
+    pattern: /(\{ id:56, name:\\"Laksha I\\"[^}]*?imageUrl:\\")\\"/,
+    replacement: '$1public/products/image1023.png\\"',
+  },
+];
+
+for (const fix of productImageFixes) {
+  if (!fix.pattern.test(html)) {
+    throw new Error(`Could not find product image field for ${fix.label}.`);
+  }
+  html = html.replace(fix.pattern, fix.replacement);
+  console.log(`Updated image for ${fix.label}`);
+}
+
+fs.writeFileSync(indexPath, html);

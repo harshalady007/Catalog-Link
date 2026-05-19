@@ -127,10 +127,26 @@ if (stockCountDisplayPattern.test(html)) {
   console.log("Skipped visible product stock counts; they were not present");
 }
 
-const forbiddenStockUi = ["inStockOnly", "In Stock Only", "stockQty &&", ">Availability<", " in stock"];
+const clinicalWasteBinPattern = /  \{ id:24, name:\\\"Clinical Waste Bin \(20L, 50L, 60L\)\\\", size:\\\"Available in multiple sizes\\\", stockQty:null, unitPrice:null, itemCode:\\\"Clinical Bin Stainless Steel\\\", category:\\\"Litter Bin\\\", imageUrl:\\\"public\/products\/image17\.jpeg\\\" \},\\n/;
+if (clinicalWasteBinPattern.test(html)) {
+  html = html.replace(clinicalWasteBinPattern, "");
+  console.log("Removed Clinical Waste Bin");
+} else {
+  console.log("Skipped Clinical Waste Bin; it was not present");
+}
+
+const forbiddenStockUi = [
+  "inStockOnly",
+  "In Stock Only",
+  "stockQty &&",
+  ">Availability<",
+  " in stock",
+  "Clinical Waste Bin",
+  "Clinical Bin Stainless Steel",
+];
 for (const forbidden of forbiddenStockUi) {
   if (html.includes(forbidden)) {
-    throw new Error(`Stock UI cleanup failed; still found ${forbidden}.`);
+    throw new Error(`Catalogue cleanup failed; still found ${forbidden}.`);
   }
 }
 

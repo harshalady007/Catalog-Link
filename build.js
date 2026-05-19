@@ -32,36 +32,42 @@ for (const target of targets) {
 const indexPath = path.join(__dirname, "public", "index.html");
 let html = fs.readFileSync(indexPath, "utf8");
 
-const productImageFixes = [
-  {
-    label: "Sulo 120 Ltr Without pedal",
-    pattern: /(\{ id:31, name:\\\"Sulo 120 Ltr Without pedal\\\"[^}]*?imageUrl:\\\")\\\"/,
-    replacement: '$1public/products/image1005.png\\\"',
-  },
-  {
-    label: "Sulo 360 Ltr",
-    pattern: /(\{ id:34, name:\\\"Sulo 360 Ltr\\\"[^}]*?imageUrl:\\\")\\\"/,
-    replacement: '$1public/products/image1006.png\\\"',
-  },
-  {
-    label: "Plastic Gogic Bin 120 Ltr without pedal",
-    pattern: /(\{ id:36, name:\\\"Plastic Gogic Bin 120 Ltr without pedal\\\"[^}]*?imageUrl:\\\")\\\"/,
-    replacement: '$1public/products/image1001.png\\\"',
-  },
-  {
-    label: "Laksha I",
-    pattern: /(\{ id:56, name:\\\"Laksha I\\\"[^}]*?imageUrl:\\\")\\\"/,
-    replacement: '$1public/products/image1023.png\\\"',
-  },
-];
-
-for (const fix of productImageFixes) {
-  if (!fix.pattern.test(html)) {
-    throw new Error(`Could not find product image field for ${fix.label}.`);
+function getProductEntry(id, label) {
+  const marker = `  { id:${id},`;
+  const start = html.indexOf(marker);
+  if (start < 0) {
+    return null;
   }
-  html = html.replace(fix.pattern, fix.replacement);
-  console.log(`Updated image for ${fix.label}`);
+  const next = html.indexOf("  { id:", start + marker.length);
+  if (next < 0) {
+    throw new Error(`Could not find product boundary after ${label}.`);
+  }
+  return { start, next, entry: html.slice(start, next) };
 }
+
+function setProductImage({ id, label, expectedText, imageUrl }) {
+  const product = getProductEntry(id, label);
+  if (!product) {
+    throw new Error(`Could not find product ${label}.`);
+  }
+  if (!product.entry.includes(expectedText)) {
+    throw new Error(`Product boundary check failed for ${label}.`);
+  }
+  const updatedEntry = product.entry.replace(/imageUrl:\\"[^\\"]*\\"/, `imageUrl:\\"${imageUrl}\\"`);
+  if (updatedEntry === product.entry) {
+    throw new Error(`Could not update image for ${label}.`);
+  }
+  html = html.slice(0, product.start) + updatedEntry + html.slice(product.next);
+  console.log(`Updated image for ${label}`);
+}
+
+[
+  { id: 31, label: "Sulo 120 Ltr Without pedal", expectedText: "Sulo 120 Ltr Without pedal", imageUrl: "public/products/image1005.png" },
+  { id: 34, label: "Sulo 360 Ltr", expectedText: "Sulo 360 Ltr", imageUrl: "public/products/image1006.png" },
+  { id: 36, label: "Plastic Gogic Bin 120 Ltr without pedal", expectedText: "Plastic Gogic Bin 120 Ltr without pedal", imageUrl: "public/products/image1001.png" },
+  { id: 55, label: "Kava Swing Top", expectedText: "Kava Swing Top", imageUrl: "public/products/image21.png" },
+  { id: 56, label: "Laksha I", expectedText: "Laksha I", imageUrl: "public/products/image1023.png" },
+].forEach(setProductImage);
 
 const availabilityStockFilterBlock = [
   "\\n          <div className=\\\"sidebar-section\\\">",
@@ -127,40 +133,36 @@ if (stockCountDisplayPattern.test(html)) {
   console.log("Skipped visible product stock counts; they were not present");
 }
 
-const clinicalWasteBinPattern = /  \{ id:24, name:\\\"Clinical Waste Bin \(20L, 50L, 60L\)\\\", size:\\\"Available in multiple sizes\\\", stockQty:null, unitPrice:null, itemCode:\\\"Clinical Bin Stainless Steel\\\", category:\\\"Litter Bin\\\", imageUrl:\\\"public\/products\/image17\.jpeg\\\" \},\\n/;
-if (clinicalWasteBinPattern.test(html)) {
-  html = html.replace(clinicalWasteBinPattern, "");
-  console.log("Removed Clinical Waste Bin");
-} else {
-  console.log("Skipped Clinical Waste Bin; it was not present");
-}
-
-function removeProductById({ id, label, expectedCode }) {
-  const marker = `  { id:${id},`;
-  const start = html.indexOf(marker);
-  if (start < 0) {
+function removeProductById({ id, label, expectedText }) {
+  const product = getProductEntry(id, label);
+  if (!product) {
     console.log(`Skipped ${label}; it was not present`);
     return;
   }
-  const next = html.indexOf("  { id:", start + marker.length);
-  if (next < 0) {
-    throw new Error(`Could not find product boundary after ${label}.`);
-  }
-  const entry = html.slice(start, next);
-  if (!entry.includes(expectedCode)) {
+  if (!product.entry.includes(expectedText)) {
     throw new Error(`Product boundary check failed for ${label}.`);
   }
-  html = html.slice(0, start) + html.slice(next);
+  html = html.slice(0, product.start) + html.slice(product.next);
   console.log(`Removed ${label}`);
 }
 
 [
-  { id: 8, label: "SS Pedal Bin 29 Ltr", expectedCode: "BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL" },
-  { id: 9, label: "SS Pedal Bin 5 Ltr", expectedCode: "BIN SS 5L WITH PEDAL" },
-  { id: 20, label: "SS Pedal Bin 56 Ltr", expectedCode: "BIN 56L 300MM DIA 785MM HIGHT" },
+  { id: 24, label: "Clinical Waste Bin", expectedText: "Clinical Bin Stainless Steel" },
+  { id: 8, label: "SS Pedal Bin 29 Ltr", expectedText: "BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL" },
+  { id: 9, label: "SS Pedal Bin 5 Ltr", expectedText: "BIN SS 5L WITH PEDAL" },
+  { id: 20, label: "SS Pedal Bin 56 Ltr", expectedText: "BIN 56L 300MM DIA 785MM HIGHT" },
 ].forEach(removeProductById);
 
-const forbiddenStockUi = [
+const kavaEntry = getProductEntry(55, "Kava Swing Top")?.entry || "";
+const lakshaEntry = getProductEntry(56, "Laksha I")?.entry || "";
+if (!kavaEntry.includes("imageUrl:\\\"public/products/image21.png\\\"")) {
+  throw new Error("Kava Swing Top image cleanup failed.");
+}
+if (!lakshaEntry.includes("imageUrl:\\\"public/products/image1023.png\\\"")) {
+  throw new Error("Laksha I image cleanup failed.");
+}
+
+const forbiddenText = [
   "inStockOnly",
   "In Stock Only",
   "stockQty &&",
@@ -172,7 +174,7 @@ const forbiddenStockUi = [
   "BIN SS 5L WITH PEDAL",
   "BIN 56L 300MM DIA 785MM HIGHT",
 ];
-for (const forbidden of forbiddenStockUi) {
+for (const forbidden of forbiddenText) {
   if (html.includes(forbidden)) {
     throw new Error(`Catalogue cleanup failed; still found ${forbidden}.`);
   }

@@ -119,7 +119,15 @@ for (const fix of stockUiFixes) {
   }
 }
 
-const forbiddenStockUi = ["inStockOnly", "In Stock Only", "stockQty &&", ">Availability<"];
+const stockCountDisplayPattern = /        \{product\.stockQty != null && \(\\n          <div className=\\\"card-stock\\\">.*?\{product\.stockQty\} in stock<\\\/div>\\n        \)\}\\n/;
+if (stockCountDisplayPattern.test(html)) {
+  html = html.replace(stockCountDisplayPattern, "");
+  console.log("Removed visible product stock counts");
+} else {
+  console.log("Skipped visible product stock counts; they were not present");
+}
+
+const forbiddenStockUi = ["inStockOnly", "In Stock Only", "stockQty &&", ">Availability<", " in stock"];
 for (const forbidden of forbiddenStockUi) {
   if (html.includes(forbidden)) {
     throw new Error(`Stock UI cleanup failed; still found ${forbidden}.`);

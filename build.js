@@ -44,6 +44,11 @@ const productImageFixes = [
     replacement: '$1public/products/image1006.png\\"',
   },
   {
+    label: "Plastic Gogic Bin 120 Ltr without pedal",
+    pattern: /(\{ id:36, name:\\"Plastic Gogic Bin 120 Ltr without pedal\\"[^}]*?imageUrl:\\")\\"/,
+    replacement: '$1public/products/image1001.png\\"',
+  },
+  {
     label: "Laksha I",
     pattern: /(\{ id:56, name:\\"Laksha I\\"[^}]*?imageUrl:\\")\\"/,
     replacement: '$1public/products/image1023.png\\"',

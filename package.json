@@ -1,0 +1,12 @@
+{
+  "name": "bluestream-catalogue",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "nodemailer": "^6.9.16"
+  }
+}

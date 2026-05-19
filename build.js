@@ -135,6 +135,31 @@ if (clinicalWasteBinPattern.test(html)) {
   console.log("Skipped Clinical Waste Bin; it was not present");
 }
 
+function removeProductById({ id, label, expectedCode }) {
+  const marker = `  { id:${id},`;
+  const start = html.indexOf(marker);
+  if (start < 0) {
+    console.log(`Skipped ${label}; it was not present`);
+    return;
+  }
+  const next = html.indexOf("  { id:", start + marker.length);
+  if (next < 0) {
+    throw new Error(`Could not find product boundary after ${label}.`);
+  }
+  const entry = html.slice(start, next);
+  if (!entry.includes(expectedCode)) {
+    throw new Error(`Product boundary check failed for ${label}.`);
+  }
+  html = html.slice(0, start) + html.slice(next);
+  console.log(`Removed ${label}`);
+}
+
+[
+  { id: 8, label: "SS Pedal Bin 29 Ltr", expectedCode: "BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL" },
+  { id: 9, label: "SS Pedal Bin 5 Ltr", expectedCode: "BIN SS 5L WITH PEDAL" },
+  { id: 20, label: "SS Pedal Bin 56 Ltr", expectedCode: "BIN 56L 300MM DIA 785MM HIGHT" },
+].forEach(removeProductById);
+
 const forbiddenStockUi = [
   "inStockOnly",
   "In Stock Only",
@@ -143,6 +168,9 @@ const forbiddenStockUi = [
   " in stock",
   "Clinical Waste Bin",
   "Clinical Bin Stainless Steel",
+  "BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL",
+  "BIN SS 5L WITH PEDAL",
+  "BIN 56L 300MM DIA 785MM HIGHT",
 ];
 for (const forbidden of forbiddenStockUi) {
   if (html.includes(forbidden)) {

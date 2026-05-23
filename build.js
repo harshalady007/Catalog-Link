@@ -75,6 +75,31 @@ function replaceProductField({ id, label, expectedText, field, value }) {
   console.log(`Updated ${field} for ${label}`);
 }
 
+function replaceProductNumberField({ id, label, expectedText, field, value }) {
+  const product = getProductEntry(id, label);
+  if (!product) {
+    throw new Error(`Could not find product ${label}.`);
+  }
+  if (!product.entry.includes(expectedText)) {
+    throw new Error(`Product boundary check failed for ${label}.`);
+  }
+
+  const token = `${field}:`;
+  const valueStart = product.entry.indexOf(token);
+  if (valueStart < 0) {
+    throw new Error(`Could not find ${field} for ${label}.`);
+  }
+  const actualStart = valueStart + token.length;
+  const actualEnd = product.entry.indexOf(',', actualStart);
+  if (actualEnd < 0) {
+    throw new Error(`Could not find ${field} end for ${label}.`);
+  }
+
+  const updatedEntry = product.entry.slice(0, actualStart) + value + product.entry.slice(actualEnd);
+  html = html.slice(0, product.start) + updatedEntry + html.slice(product.next);
+  console.log(`Updated ${field} for ${label}`);
+}
+
 [
   { id: 31, label: 'Sulo 120 Ltr Without pedal', expectedText: 'Sulo 120 Ltr Without pedal', imageUrl: 'public/products/image1005.png' },
   { id: 34, label: 'Sulo 360 Ltr', expectedText: 'Sulo 360 Ltr', imageUrl: 'public/products/image1006.png' },
@@ -89,6 +114,10 @@ function replaceProductField({ id, label, expectedText, field, value }) {
   { id: 78, label: 'Oris III', expectedText: 'Oris III', category: 'Bench' },
   { id: 79, label: 'Banga I', expectedText: 'Banga I', category: 'Bench' },
 ].forEach((item) => replaceProductField({ ...item, field: 'category', value: item.category }));
+
+[
+  { id: 62, label: 'Jaipur II', expectedText: 'Jaipur II', unitPrice: 1980 },
+].forEach((item) => replaceProductNumberField({ ...item, field: 'unitPrice', value: item.unitPrice }));
 
 function replaceText(label, oldText, replacement) {
   if (html.includes(oldText)) {
@@ -194,6 +223,11 @@ for (const item of expectedProductText) {
   if (!entry.includes(`${item.field}:${eq}${item.value}${eq}`)) {
     throw new Error(`${item.label} ${item.field} cleanup failed.`);
   }
+}
+
+const jaipurEntry = getProductEntry(62, 'Jaipur II')?.entry || '';
+if (!jaipurEntry.includes('unitPrice:1980')) {
+  throw new Error('Jaipur II price cleanup failed.');
 }
 
 const forbiddenText = [

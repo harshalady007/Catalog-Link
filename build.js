@@ -207,6 +207,9 @@ function removeProductById({ id, label, expectedText }) {
   { id: 8, label: 'SS Pedal Bin 29 Ltr', expectedText: 'BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL' },
   { id: 9, label: 'SS Pedal Bin 5 Ltr', expectedText: 'BIN SS 5L WITH PEDAL' },
   { id: 20, label: 'SS Pedal Bin 56 Ltr', expectedText: 'BIN 56L 300MM DIA 785MM HIGHT' },
+  { id: 33, label: 'Sulo 240 Ltr Without pedal', expectedText: 'Sulo 240 Ltr Without pedal' },
+  { id: 35, label: 'Plastic Gogic Bin 120 Ltr with pedal', expectedText: 'Plastic Gogic Bin 120 Ltr with pedal' },
+  { id: 36, label: 'Plastic Gogic Bin 120 Ltr without pedal', expectedText: 'Plastic Gogic Bin 120 Ltr without pedal' },
 ].forEach(removeProductById);
 
 const expectedProductText = [
@@ -241,6 +244,9 @@ const forbiddenText = [
   'BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL',
   'BIN SS 5L WITH PEDAL',
   'BIN 56L 300MM DIA 785MM HIGHT',
+  'Sulo 240 Ltr Without pedal',
+  'Plastic Gogic Bin 120 Ltr with pedal',
+  'Plastic Gogic Bin 120 Ltr without pedal',
 ];
 
 for (const forbidden of forbiddenText) {

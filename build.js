@@ -212,6 +212,44 @@ function removeProductById({ id, label, expectedText }) {
   { id: 36, label: 'Plastic Gogic Bin 120 Ltr without pedal', expectedText: 'Plastic Gogic Bin 120 Ltr without pedal' },
 ].forEach(removeProductById);
 
+function increaseAllProductPrices(multiplier) {
+  const productsStart = html.indexOf('const ALL_PRODUCTS = [');
+  if (productsStart < 0) {
+    throw new Error('Could not find ALL_PRODUCTS while increasing prices.');
+  }
+  const productsEnd = html.indexOf('];', productsStart);
+  if (productsEnd < 0) {
+    throw new Error('Could not find ALL_PRODUCTS boundary while increasing prices.');
+  }
+
+  const productsBlock = html.slice(productsStart, productsEnd + 2);
+  const increase = (value) => String(Math.round(Number(value) * multiplier));
+  let unitPriceCount = 0;
+  let capacityPriceCount = 0;
+
+  let updatedBlock = productsBlock.replace(/unitPrice:(\d+(?:\.\d+)?)/g, (_match, value) => {
+    unitPriceCount += 1;
+    return `unitPrice:${increase(value)}`;
+  });
+
+  updatedBlock = updatedBlock.replace(/capacityPrices:\{([^}]*)\}/g, (_match, body) => {
+    const updatedBody = body.replace(/:(\d+(?:\.\d+)?)/g, (_priceMatch, value) => {
+      capacityPriceCount += 1;
+      return `:${increase(value)}`;
+    });
+    return `capacityPrices:{${updatedBody}}`;
+  });
+
+  if (unitPriceCount === 0 && capacityPriceCount === 0) {
+    throw new Error('No catalogue prices were increased.');
+  }
+
+  html = html.slice(0, productsStart) + updatedBlock + html.slice(productsEnd + 2);
+  console.log(`Increased catalogue prices by ${Math.round((multiplier - 1) * 100)}% (${unitPriceCount} unit prices, ${capacityPriceCount} capacity prices)`);
+}
+
+increaseAllProductPrices(1.2);
+
 const expectedProductText = [
   { id: 55, label: 'Kava Swing Top', field: 'imageUrl', value: 'public/products/image1022.png' },
   { id: 56, label: 'Laksha I', field: 'imageUrl', value: 'public/products/image1023.png' },
@@ -228,9 +266,19 @@ for (const item of expectedProductText) {
   }
 }
 
+const firstProductEntry = getProductEntry(1, 'Recycling SS 24L 3-in-1')?.entry || '';
+if (!firstProductEntry.includes('unitPrice:216')) {
+  throw new Error('20% price increase check failed for Recycling SS 24L 3-in-1.');
+}
+
+const rectanglePedalEntry = getProductEntry(25, 'SS Rectangle Pedal Bin')?.entry || '';
+if (!rectanglePedalEntry.includes('unitPrice:66') || !rectanglePedalEntry.includes(`${eq}6 Ltr${eq}:66`)) {
+  throw new Error('20% capacity price increase check failed for SS Rectangle Pedal Bin.');
+}
+
 const jaipurEntry = getProductEntry(62, 'Jaipur II')?.entry || '';
-if (!jaipurEntry.includes('unitPrice:1980')) {
-  throw new Error('Jaipur II price cleanup failed.');
+if (!jaipurEntry.includes('unitPrice:2376')) {
+  throw new Error('Jaipur II price increase failed.');
 }
 
 const forbiddenText = [

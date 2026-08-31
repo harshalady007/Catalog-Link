@@ -177,6 +177,19 @@ const availabilityStockFilterBlock = [
   },
 ].forEach((fix) => replaceText(fix.label, fix.old, fix.replacement));
 
+replaceText(
+  'color-aware stock calculation',
+  '  const selectedUnitPrice = selectedCapacity && product.capacityPrices ? product.capacityPrices[selectedCapacity] : product.unitPrice;' + nl,
+  '  const selectedUnitPrice = selectedCapacity && product.capacityPrices ? product.capacityPrices[selectedCapacity] : product.unitPrice;' + nl +
+    '  const displayedStockQty = selectedColor && product.colorStock ? product.colorStock[selectedColor] : product.stockQty;' + nl,
+);
+
+replaceText(
+  'color-aware stock quantity limit',
+  '  const max = product.stockQty || 9999;' + nl,
+  '  const max = displayedStockQty != null ? displayedStockQty : 9999;' + nl,
+);
+
 const stockDisplayStart = '        {product.stockQty != null && (' + nl;
 const stockStart = html.indexOf(stockDisplayStart);
 if (stockStart >= 0) {
@@ -186,9 +199,9 @@ if (stockStart >= 0) {
     throw new Error('Could not find visible product stock count boundary.');
   }
   const updatedStockDisplay = [
-    '        {product.stockQty != null && (' + nl,
-    '          <div className=' + eq + 'card-stock' + eq + ' style={product.stockQty > 0 ? undefined : { color: ' + sq + '#7C0000' + sq + ' }}>' + nl,
-    '            {product.stockQty > 0 ? ' + sq + '✓ ' + sq + ' + product.stockQty.toLocaleString() + ' + sq + ' in stock' + sq + ' : ' + sq + 'Out of stock' + sq + '}' + nl,
+    '        {displayedStockQty != null && (' + nl,
+    '          <div className=' + eq + 'card-stock' + eq + ' style={displayedStockQty > 0 ? undefined : { color: ' + sq + '#7C0000' + sq + ' }}>' + nl,
+    '            {displayedStockQty > 0 ? ' + sq + '✓ ' + sq + ' + displayedStockQty.toLocaleString() + ' + sq + ' in stock' + sq + ' : ' + sq + 'Out of stock' + sq + '}' + nl,
     '          <' + slash + '/div>' + nl,
     '        )}' + nl,
   ].join('');
@@ -269,6 +282,7 @@ const inventoryUpdates = [
   { id: 55, label: 'Kava Swing Top', stockQty: 0 },
   { id: 56, label: 'Laksha I', stockQty: 73 },
   { id: 57, label: 'Nemo E- waste Bin', stockQty: 0 },
+  { id: 58, label: 'Nemo Indoor', stockQty: 145 },
   { id: 59, label: 'Nemo outdoor', stockQty: 5 },
   { id: 60, label: 'Taurus C', stockQty: 0 },
   { id: 61, label: 'Blanc', stockQty: 0 },
@@ -300,9 +314,42 @@ inventoryUpdates.forEach((item) => replaceProductNumberField({
   value: item.stockQty,
 }));
 
-if (inventoryUpdates.length !== 68) {
-  throw new Error(`Expected 68 inventory updates, found ${inventoryUpdates.length}.`);
+if (inventoryUpdates.length !== 69) {
+  throw new Error(`Expected 69 inventory updates, found ${inventoryUpdates.length}.`);
 }
+
+function appendProductFields({ id, label, fields }) {
+  const product = getProductEntry(id, label);
+  if (!product || !product.entry.includes(label)) {
+    throw new Error(`Could not find product ${label} while appending fields.`);
+  }
+  const closing = product.entry.lastIndexOf(' }');
+  if (closing < 0) {
+    throw new Error(`Could not find product closing boundary for ${label}.`);
+  }
+  const updatedEntry = product.entry.slice(0, closing) + `, ${fields}` + product.entry.slice(closing);
+  html = html.slice(0, product.start) + updatedEntry + html.slice(product.next);
+  console.log(`Added color inventory for ${label}`);
+}
+
+const nemoIndoorColorStock = {
+  Green: 55,
+  'Light Green': 15,
+  Red: 20,
+  'Light Blue': 27,
+  Blue: 15,
+  Brown: 13,
+};
+const encodeProductString = (value) => eq + value + eq;
+const nemoIndoorColors = Object.keys(nemoIndoorColorStock);
+appendProductFields({
+  id: 58,
+  label: 'Nemo Indoor',
+  fields: [
+    `colors:[${nemoIndoorColors.map(encodeProductString).join(',')}]`,
+    `colorStock:{${Object.entries(nemoIndoorColorStock).map(([color, quantity]) => `${encodeProductString(color)}:${quantity}`).join(',')}}`,
+  ].join(', '),
+});
 
 function increaseAllProductPrices(multiplier) {
   const productsStart = html.indexOf('const ALL_PRODUCTS = [');
@@ -402,6 +449,7 @@ const quantityDiscountProducts = [
   { id: 51, label: 'Heritage Litter Bin' },
   { id: 53, label: 'Jaipur Lite Litter Bin' },
   { id: 56, label: 'Laksha I' },
+  { id: 58, label: 'Nemo Indoor' },
   { id: 59, label: 'Nemo outdoor' },
   { id: 64, label: 'Kava II' },
   { id: 65, label: 'Kava III' },
@@ -416,8 +464,8 @@ const quantityDiscountProducts = [
 
 quantityDiscountProducts.forEach(halveProductPrice);
 
-if (quantityDiscountProducts.length !== 44) {
-  throw new Error(`Expected 44 quantity-discounted products, found ${quantityDiscountProducts.length}.`);
+if (quantityDiscountProducts.length !== 45) {
+  throw new Error(`Expected 45 quantity-discounted products, found ${quantityDiscountProducts.length}.`);
 }
 
 const expectedProductText = [
@@ -462,8 +510,13 @@ if (!jaipurEntry.includes('unitPrice:2376')) {
 }
 
 const nemoIndoorEntry = getProductEntry(58, 'Nemo Indoor')?.entry || '';
-if (!nemoIndoorEntry.includes('unitPrice:713')) {
-  throw new Error('Color-only note price preservation failed for Nemo Indoor.');
+if (!nemoIndoorEntry.includes('unitPrice:356.5')) {
+  throw new Error('50% quantity discount failed for Nemo Indoor.');
+}
+for (const [color, quantity] of Object.entries(nemoIndoorColorStock)) {
+  if (!nemoIndoorEntry.includes(`${encodeProductString(color)}:${quantity}`)) {
+    throw new Error(`Color inventory update failed for Nemo Indoor ${color}.`);
+  }
 }
 
 const preacastEntry = getProductEntry(80, 'Preacast Bench')?.entry || '';
@@ -476,11 +529,6 @@ for (const item of inventoryUpdates) {
   if (!entry.includes(`stockQty:${item.stockQty}`)) {
     throw new Error(`Inventory update failed for ${item.label}.`);
   }
-}
-
-const nemoIndoorStockEntry = getProductEntry(58, 'Nemo Indoor')?.entry || '';
-if (!nemoIndoorStockEntry.includes('stockQty:null')) {
-  throw new Error('Nemo Indoor stock should remain unset because no quantity was supplied.');
 }
 
 const forbiddenText = [

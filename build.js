@@ -185,10 +185,17 @@ if (stockStart >= 0) {
   if (stockEnd < 0) {
     throw new Error('Could not find visible product stock count boundary.');
   }
-  html = html.slice(0, stockStart) + html.slice(stockEnd + stockEndToken.length);
-  console.log('Removed visible product stock counts');
+  const updatedStockDisplay = [
+    '        {product.stockQty != null && (' + nl,
+    '          <div className=' + eq + 'card-stock' + eq + ' style={product.stockQty > 0 ? undefined : { color: ' + sq + '#7C0000' + sq + ' }}>' + nl,
+    '            {product.stockQty > 0 ? ' + sq + '✓ ' + sq + ' + product.stockQty.toLocaleString() + ' + sq + ' in stock' + sq + ' : ' + sq + 'Out of stock' + sq + '}' + nl,
+    '          <' + slash + '/div>' + nl,
+    '        )}' + nl,
+  ].join('');
+  html = html.slice(0, stockStart) + updatedStockDisplay + html.slice(stockEnd + stockEndToken.length);
+  console.log('Updated visible product stock counts');
 } else {
-  console.log('Skipped visible product stock counts; they were not present');
+  throw new Error('Could not find visible product stock counts to update.');
 }
 
 function removeProductById({ id, label, expectedText }) {
@@ -213,6 +220,89 @@ function removeProductById({ id, label, expectedText }) {
   { id: 35, label: 'Plastic Gogic Bin 120 Ltr with pedal', expectedText: 'Plastic Gogic Bin 120 Ltr with pedal' },
   { id: 36, label: 'Plastic Gogic Bin 120 Ltr without pedal', expectedText: 'Plastic Gogic Bin 120 Ltr without pedal' },
 ].forEach(removeProductById);
+
+const inventoryUpdates = [
+  { id: 1, label: 'Recycling SS 24L 3-in-1 (8L × 3)', stockQty: 229 },
+  { id: 2, label: 'Recycling SS 60L 3-in-1 (20L × 3)', stockQty: 130 },
+  { id: 3, label: 'Picolo Junior — 8 Ltr', stockQty: 96 },
+  { id: 4, label: 'Slim Jim', stockQty: 380 },
+  { id: 5, label: 'Ballerina Bin — 60 Ltr', stockQty: 0 },
+  { id: 6, label: 'Picolo Senior — 25 Ltr Mirror Finish', stockQty: 6 },
+  { id: 7, label: '3-in-1 Plastic Recycling Bin (Italy)', stockQty: 80 },
+  { id: 10, label: 'Plastic Push Bin Grey — 35 Ltr', stockQty: 194 },
+  { id: 11, label: 'Kava 2-Stream Recycle Bin', stockQty: 15 },
+  { id: 12, label: 'Plastic Push Bin — 25 Ltr', stockQty: 380 },
+  { id: 13, label: 'Big Belly — 25 Ltr', stockQty: 173 },
+  { id: 14, label: 'SS Swing Top Mini — 6 Ltr', stockQty: 1436 },
+  { id: 15, label: 'Neptune Bin', stockQty: 33 },
+  { id: 16, label: 'SS Urn Mirror Finish', stockQty: 168 },
+  { id: 17, label: 'Ovetto Bin (Italy)', stockQty: 33 },
+  { id: 18, label: 'Picolo Brush Finish', stockQty: 30 },
+  { id: 19, label: 'SS Urn Bin Brush Finish', stockQty: 104 },
+  { id: 21, label: 'Ashtray Bin — Stand Type', stockQty: 18 },
+  { id: 22, label: '660 Ltr Shelter Bin', stockQty: 11 },
+  { id: 23, label: 'GRP Planter Box', stockQty: 75 },
+  { id: 25, label: 'SS Rectangle Pedal Bin', stockQty: 0 },
+  { id: 30, label: 'Sulo 120 Ltr with pedal', stockQty: 55 },
+  { id: 31, label: 'Sulo 120 Ltr Without pedal', stockQty: 18 },
+  { id: 32, label: 'Sulo 240 Ltr with pedal', stockQty: 165 },
+  { id: 34, label: 'Sulo 360 Ltr', stockQty: 33 },
+  { id: 37, label: 'Plastic Gogic Bin 240 Ltr', stockQty: 0 },
+  // Totals from the color-specific handwritten quantities.
+  { id: 38, label: 'Sulo 660 Ltr Bin with Flat Lid and Wheel', stockQty: 66 },
+  { id: 39, label: 'Sulo 1.1 CBM Dome Lid', stockQty: 14 },
+  { id: 40, label: 'Plastic Gogic 1.1 CBM Dome Lid', stockQty: 7 },
+  { id: 41, label: '1.1 CBM Galvanized Garbage Container', stockQty: 0 },
+  { id: 42, label: '2.5 CBM Galvanized Garbage Container', stockQty: 4 },
+  { id: 43, label: '4.5 CBM Galvanized Garbage Container', stockQty: 0 },
+  { id: 44, label: 'Tuarus I Litter Bin', stockQty: 0 },
+  { id: 45, label: 'Dog Pole Bin (without dispenser and signage)', stockQty: 0 },
+  { id: 46, label: 'JUMBO FOODCOURT BIN-FJHK364', stockQty: 5 },
+  { id: 47, label: 'LAKSH III METAL 135L-FJHK366R', stockQty: 9 },
+  { id: 48, label: 'Stillo 3 Stream Bin', stockQty: 2 },
+  { id: 49, label: 'Stillo 4 Stream Bin', stockQty: 2 },
+  { id: 50, label: 'Alum Litter Bin', stockQty: 0 },
+  { id: 51, label: 'Heritage Litter Bin', stockQty: 3 },
+  { id: 52, label: 'Jaipur I Litter Bin', stockQty: 0 },
+  { id: 53, label: 'Jaipur Lite Litter Bin', stockQty: 1 },
+  { id: 54, label: 'Kava I Litter Bin', stockQty: 0 },
+  { id: 55, label: 'Kava Swing Top', stockQty: 0 },
+  { id: 56, label: 'Laksha I', stockQty: 73 },
+  { id: 57, label: 'Nemo E- waste Bin', stockQty: 0 },
+  { id: 59, label: 'Nemo outdoor', stockQty: 5 },
+  { id: 60, label: 'Taurus C', stockQty: 0 },
+  { id: 61, label: 'Blanc', stockQty: 0 },
+  { id: 62, label: 'Jaipur II', stockQty: 0 },
+  { id: 63, label: 'Jaipur III', stockQty: 0 },
+  { id: 64, label: 'Kava II', stockQty: 22 },
+  { id: 65, label: 'Kava III', stockQty: 1 },
+  { id: 66, label: 'Laksha II', stockQty: 11 },
+  { id: 67, label: 'Laksha III', stockQty: 0 },
+  { id: 68, label: 'Oris Bike Rack', stockQty: 0 },
+  { id: 69, label: 'Kava Bike Rack', stockQty: 0 },
+  { id: 70, label: 'Taurus Bike Rack - 2m length', stockQty: 0 },
+  { id: 71, label: 'Heritage I Bench', stockQty: 0 },
+  { id: 72, label: 'Heritage II Bench', stockQty: 2 },
+  { id: 73, label: 'Heritage III Bench', stockQty: 3 },
+  { id: 74, label: 'Laksha Picnic Table', stockQty: 2 },
+  { id: 75, label: 'Luma Bench', stockQty: 0 },
+  { id: 76, label: 'Oris I', stockQty: 0 },
+  { id: 77, label: 'Oris II', stockQty: 0 },
+  { id: 78, label: 'Oris III', stockQty: 1 },
+  { id: 79, label: 'Banga I', stockQty: 2 },
+  { id: 80, label: 'Preacast Bench', stockQty: 22 },
+];
+
+inventoryUpdates.forEach((item) => replaceProductNumberField({
+  ...item,
+  expectedText: item.label,
+  field: 'stockQty',
+  value: item.stockQty,
+}));
+
+if (inventoryUpdates.length !== 68) {
+  throw new Error(`Expected 68 inventory updates, found ${inventoryUpdates.length}.`);
+}
 
 function increaseAllProductPrices(multiplier) {
   const productsStart = html.indexOf('const ALL_PRODUCTS = [');
@@ -381,12 +471,23 @@ if (!preacastEntry.includes('unitPrice:1320')) {
   throw new Error('50% quantity discount failed for Preacast Bench.');
 }
 
+for (const item of inventoryUpdates) {
+  const entry = getProductEntry(item.id, item.label)?.entry || '';
+  if (!entry.includes(`stockQty:${item.stockQty}`)) {
+    throw new Error(`Inventory update failed for ${item.label}.`);
+  }
+}
+
+const nemoIndoorStockEntry = getProductEntry(58, 'Nemo Indoor')?.entry || '';
+if (!nemoIndoorStockEntry.includes('stockQty:null')) {
+  throw new Error('Nemo Indoor stock should remain unset because no quantity was supplied.');
+}
+
 const forbiddenText = [
   'inStockOnly',
   'In Stock Only',
   'stockQty &&',
   '>Availability<',
-  ' in stock',
   'Clinical Waste Bin',
   'Clinical Bin Stainless Steel',
   'BIN SS 29L 250MM DIA 650MM HIGHT WITH PEDAL',

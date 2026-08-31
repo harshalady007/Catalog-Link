@@ -43,7 +43,9 @@ function getProductEntry(id, label) {
   if (start < 0) {
     return null;
   }
-  const next = html.indexOf('  { id:', start + marker.length);
+  const nextProduct = html.indexOf('  { id:', start + marker.length);
+  const productsEnd = html.indexOf('];', start + marker.length);
+  const next = nextProduct >= 0 && nextProduct < productsEnd ? nextProduct : productsEnd;
   if (next < 0) {
     throw new Error(`Could not find product boundary after ${label}.`);
   }
@@ -250,6 +252,84 @@ function increaseAllProductPrices(multiplier) {
 
 increaseAllProductPrices(1.2);
 
+function halveProductPrice({ id, label }) {
+  const product = getProductEntry(id, label);
+  if (!product) {
+    throw new Error(`Could not find product ${label} while applying the quantity discount.`);
+  }
+  if (!product.entry.includes(label)) {
+    throw new Error(`Product boundary check failed for ${label} while applying the quantity discount.`);
+  }
+
+  const match = product.entry.match(/unitPrice:(\d+(?:\.\d+)?)/);
+  if (!match) {
+    throw new Error(`Could not find a numeric unitPrice for ${label}.`);
+  }
+
+  const halvedPrice = Number(match[1]) / 2;
+  replaceProductNumberField({
+    id,
+    label,
+    expectedText: label,
+    field: 'unitPrice',
+    value: String(halvedPrice),
+  });
+  console.log(`Reduced ${label} from AED ${match[1]} to AED ${halvedPrice}`);
+}
+
+const quantityDiscountProducts = [
+  { id: 1, label: 'Recycling SS 24L 3-in-1 (8L × 3)' },
+  { id: 2, label: 'Recycling SS 60L 3-in-1 (20L × 3)' },
+  { id: 3, label: 'Picolo Junior — 8 Ltr' },
+  { id: 4, label: 'Slim Jim' },
+  { id: 6, label: 'Picolo Senior — 25 Ltr Mirror Finish' },
+  { id: 7, label: '3-in-1 Plastic Recycling Bin (Italy)' },
+  { id: 10, label: 'Plastic Push Bin Grey — 35 Ltr' },
+  { id: 11, label: 'Kava 2-Stream Recycle Bin' },
+  { id: 12, label: 'Plastic Push Bin — 25 Ltr' },
+  { id: 13, label: 'Big Belly — 25 Ltr' },
+  { id: 14, label: 'SS Swing Top Mini — 6 Ltr' },
+  { id: 15, label: 'Neptune Bin' },
+  { id: 16, label: 'SS Urn Mirror Finish' },
+  { id: 17, label: 'Ovetto Bin (Italy)' },
+  { id: 18, label: 'Picolo Brush Finish' },
+  { id: 19, label: 'SS Urn Bin Brush Finish' },
+  { id: 21, label: 'Ashtray Bin — Stand Type' },
+  { id: 22, label: '660 Ltr Shelter Bin' },
+  { id: 23, label: 'GRP Planter Box' },
+  { id: 30, label: 'Sulo 120 Ltr with pedal' },
+  { id: 31, label: 'Sulo 120 Ltr Without pedal' },
+  { id: 32, label: 'Sulo 240 Ltr with pedal' },
+  { id: 34, label: 'Sulo 360 Ltr' },
+  { id: 38, label: 'Sulo 660 Ltr Bin with Flat Lid and Wheel' },
+  { id: 39, label: 'Sulo 1.1 CBM Dome Lid' },
+  { id: 40, label: 'Plastic Gogic 1.1 CBM Dome Lid' },
+  { id: 42, label: '2.5 CBM Galvanized Garbage Container' },
+  { id: 46, label: 'JUMBO FOODCOURT BIN-FJHK364' },
+  { id: 47, label: 'LAKSH III METAL 135L-FJHK366R' },
+  { id: 48, label: 'Stillo 3 Stream Bin' },
+  { id: 49, label: 'Stillo 4 Stream Bin' },
+  { id: 51, label: 'Heritage Litter Bin' },
+  { id: 53, label: 'Jaipur Lite Litter Bin' },
+  { id: 56, label: 'Laksha I' },
+  { id: 59, label: 'Nemo outdoor' },
+  { id: 64, label: 'Kava II' },
+  { id: 65, label: 'Kava III' },
+  { id: 66, label: 'Laksha II' },
+  { id: 72, label: 'Heritage II Bench' },
+  { id: 73, label: 'Heritage III Bench' },
+  { id: 74, label: 'Laksha Picnic Table' },
+  { id: 78, label: 'Oris III' },
+  { id: 79, label: 'Banga I' },
+  { id: 80, label: 'Preacast Bench' },
+];
+
+quantityDiscountProducts.forEach(halveProductPrice);
+
+if (quantityDiscountProducts.length !== 44) {
+  throw new Error(`Expected 44 quantity-discounted products, found ${quantityDiscountProducts.length}.`);
+}
+
 const expectedProductText = [
   { id: 55, label: 'Kava Swing Top', field: 'imageUrl', value: 'public/products/image1022.png' },
   { id: 56, label: 'Laksha I', field: 'imageUrl', value: 'public/products/image1023.png' },
@@ -267,8 +347,18 @@ for (const item of expectedProductText) {
 }
 
 const firstProductEntry = getProductEntry(1, 'Recycling SS 24L 3-in-1')?.entry || '';
-if (!firstProductEntry.includes('unitPrice:216')) {
-  throw new Error('20% price increase check failed for Recycling SS 24L 3-in-1.');
+if (!firstProductEntry.includes('unitPrice:108')) {
+  throw new Error('50% quantity discount check failed for Recycling SS 24L 3-in-1.');
+}
+
+const ballerinaEntry = getProductEntry(5, 'Ballerina Bin — 60 Ltr')?.entry || '';
+if (!ballerinaEntry.includes('unitPrice:462')) {
+  throw new Error('Out-of-stock price preservation failed for Ballerina Bin — 60 Ltr.');
+}
+
+const swingTopMiniEntry = getProductEntry(14, 'SS Swing Top Mini — 6 Ltr')?.entry || '';
+if (!swingTopMiniEntry.includes('unitPrice:53.5')) {
+  throw new Error('Fractional quantity discount failed for SS Swing Top Mini — 6 Ltr.');
 }
 
 const rectanglePedalEntry = getProductEntry(25, 'SS Rectangle Pedal Bin')?.entry || '';
@@ -278,7 +368,17 @@ if (!rectanglePedalEntry.includes('unitPrice:66') || !rectanglePedalEntry.includ
 
 const jaipurEntry = getProductEntry(62, 'Jaipur II')?.entry || '';
 if (!jaipurEntry.includes('unitPrice:2376')) {
-  throw new Error('Jaipur II price increase failed.');
+  throw new Error('Out-of-stock price preservation failed for Jaipur II.');
+}
+
+const nemoIndoorEntry = getProductEntry(58, 'Nemo Indoor')?.entry || '';
+if (!nemoIndoorEntry.includes('unitPrice:713')) {
+  throw new Error('Color-only note price preservation failed for Nemo Indoor.');
+}
+
+const preacastEntry = getProductEntry(80, 'Preacast Bench')?.entry || '';
+if (!preacastEntry.includes('unitPrice:1320')) {
+  throw new Error('50% quantity discount failed for Preacast Bench.');
 }
 
 const forbiddenText = [

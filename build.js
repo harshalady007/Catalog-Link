@@ -468,6 +468,25 @@ if (quantityDiscountProducts.length !== 45) {
   throw new Error(`Expected 45 quantity-discounted products, found ${quantityDiscountProducts.length}.`);
 }
 
+const productTitleUpdates = [
+  { id: 30, oldTitle: 'Sulo 120 Ltr with pedal', newTitle: '120 Ltr with pedal (Bluestream)' },
+  { id: 31, oldTitle: 'Sulo 120 Ltr Without pedal', newTitle: '120 Ltr Without pedal (Bluestream)' },
+  { id: 32, oldTitle: 'Sulo 240 Ltr with pedal', newTitle: '240 Ltr with pedal (Bluestream)' },
+  { id: 34, oldTitle: 'Sulo 360 Ltr', newTitle: '360 Ltr (Bluestream)' },
+  { id: 38, oldTitle: 'Sulo 660 Ltr Bin with Flat Lid and Wheel', newTitle: '660 Ltr Bin with Flat Lid and Wheel (Bluestream)' },
+  { id: 39, oldTitle: 'Sulo 1.1 CBM Dome Lid', newTitle: '1.1 CBM Dome Lid (Bluestream)' },
+];
+
+for (const item of productTitleUpdates) {
+  replaceProductField({
+    id: item.id,
+    label: item.oldTitle,
+    expectedText: `name:${eq}${item.oldTitle}${eq}`,
+    field: 'name',
+    value: item.newTitle,
+  });
+}
+
 const expectedProductText = [
   { id: 55, label: 'Kava Swing Top', field: 'imageUrl', value: 'public/products/image1022.png' },
   { id: 56, label: 'Laksha I', field: 'imageUrl', value: 'public/products/image1023.png' },
@@ -528,6 +547,13 @@ for (const item of inventoryUpdates) {
   const entry = getProductEntry(item.id, item.label)?.entry || '';
   if (!entry.includes(`stockQty:${item.stockQty}`)) {
     throw new Error(`Inventory update failed for ${item.label}.`);
+  }
+}
+
+for (const item of productTitleUpdates) {
+  const entry = getProductEntry(item.id, item.newTitle)?.entry || '';
+  if (!entry.includes(`name:${eq}${item.newTitle}${eq}`) || entry.includes(`name:${eq}${item.oldTitle}${eq}`)) {
+    throw new Error(`Product title update failed for ${item.oldTitle}.`);
   }
 }
 

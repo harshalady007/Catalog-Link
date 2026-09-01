@@ -246,7 +246,7 @@ const inventoryUpdates = [
   { id: 11, label: 'Kava 2-Stream Recycle Bin', stockQty: 15 },
   { id: 12, label: 'Plastic Push Bin — 25 Ltr', stockQty: 380 },
   { id: 13, label: 'Big Belly — 25 Ltr', stockQty: 173 },
-  { id: 14, label: 'SS Swing Top Mini — 6 Ltr', stockQty: 1436 },
+  { id: 14, label: 'SS Swing Top Mini — 6 Ltr', stockQty: 1736 },
   { id: 15, label: 'Neptune Bin', stockQty: 33 },
   { id: 16, label: 'SS Urn Mirror Finish', stockQty: 168 },
   { id: 17, label: 'Ovetto Bin (Italy)', stockQty: 33 },

@@ -469,9 +469,9 @@ if (quantityDiscountProducts.length !== 45) {
 }
 
 const productTitleUpdates = [
-  { id: 30, oldTitle: 'Sulo 120 Ltr with pedal', newTitle: '120 Ltr with pedal (Bluestream)' },
+  { id: 30, oldTitle: 'Sulo 120 Ltr with pedal', newTitle: '120 Ltr without pedal (Bluestream)' },
   { id: 31, oldTitle: 'Sulo 120 Ltr Without pedal', newTitle: '120 Ltr Without pedal (Bluestream)' },
-  { id: 32, oldTitle: 'Sulo 240 Ltr with pedal', newTitle: '240 Ltr with pedal (Bluestream)' },
+  { id: 32, oldTitle: 'Sulo 240 Ltr with pedal', newTitle: '240 Ltr without pedal (Bluestream)' },
   { id: 34, oldTitle: 'Sulo 360 Ltr', newTitle: '360 Ltr (Bluestream)' },
   { id: 38, oldTitle: 'Sulo 660 Ltr Bin with Flat Lid and Wheel', newTitle: '660 Ltr Bin with Flat Lid and Wheel (Bluestream)' },
   { id: 39, oldTitle: 'Sulo 1.1 CBM Dome Lid', newTitle: '1.1 CBM Dome Lid (Bluestream)' },

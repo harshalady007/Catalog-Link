@@ -578,4 +578,39 @@ for (const forbidden of forbiddenText) {
   }
 }
 
+// Append separately approved products after the legacy pricing adjustments.
+// Their selling prices are final AED values and must not be discounted again.
+const additions = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-additions.json'), 'utf8'));
+const templatePattern = /(<script type="__bundler\/template">\s*)([\s\S]*?)(\s*<\/script>)/;
+const templateMatch = html.match(templatePattern);
+if (!templateMatch) throw new Error('Missing catalogue template.');
+let template = JSON.parse(templateMatch[2]);
+const productArrayStart = template.indexOf('const ALL_PRODUCTS = [');
+const productArrayEnd = template.indexOf('];', productArrayStart);
+if (productArrayStart < 0 || productArrayEnd < 0) throw new Error('Missing product array.');
+const existingArray = template.slice(productArrayStart, productArrayEnd);
+const existingIds = new Set([...existingArray.matchAll(/\{\s*id\s*:\s*(\d+)/g)].map(match => Number(match[1])));
+const newIds = new Set();
+for (const product of additions) {
+  if (!Number.isInteger(product.id) || existingIds.has(product.id) || newIds.has(product.id)) {
+    throw new Error(`Duplicate or invalid new product ID: ${product.id}`);
+  }
+  if (!product.name || !Number.isInteger(product.stockQty) || product.stockQty < 0 || !Number.isFinite(product.unitPrice) || product.unitPrice < 0) {
+    throw new Error(`Invalid new product data: ${product.name}`);
+  }
+  if (!/^\/products\/[a-z0-9-]+\.(jpeg|png)$/.test(product.imageUrl)) {
+    throw new Error(`Invalid new product image path: ${product.name}`);
+  }
+  const filename = path.basename(product.imageUrl);
+  const imageSource = path.join(__dirname, 'catalog-assets', filename);
+  if (!fs.existsSync(imageSource)) throw new Error(`Missing new product photo: ${filename}`);
+  const imageTarget = path.join(__dirname, 'public', 'products', filename);
+  fs.mkdirSync(path.dirname(imageTarget), { recursive: true });
+  fs.copyFileSync(imageSource, imageTarget);
+  newIds.add(product.id);
+}
+const appendedProducts = additions.map(product => `  ${JSON.stringify(product)},`).join('\n') + '\n';
+template = template.slice(0, productArrayEnd) + appendedProducts + template.slice(productArrayEnd);
+html = html.replace(templatePattern, (_match, prefix, _payload, suffix) => prefix + JSON.stringify(template).replace(/<\//g, '<\\/') + suffix);
+console.log(`Added ${additions.length} separate products. Existing ${existingIds.size} products retained.`);
 fs.writeFileSync(indexPath, html);

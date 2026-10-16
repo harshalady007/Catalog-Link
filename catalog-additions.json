@@ -1,0 +1,12 @@
+[
+  { "id": 81, "name": "6 Ltr Pedal Bin", "size": "", "stockQty": 402, "unitPrice": 63, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/pedal-bin-6-ltr.jpeg" },
+  { "id": 82, "name": "12 Ltr Pedal Bin", "size": "", "stockQty": 400, "unitPrice": 90, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/pedal-bin-12-ltr.jpeg" },
+  { "id": 83, "name": "20 Ltr Pedal Bin", "size": "", "stockQty": 168, "unitPrice": 138, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/pedal-bin-20-ltr.jpeg" },
+  { "id": 84, "name": "30 Ltr Pedal Bin", "size": "", "stockQty": 200, "unitPrice": 172, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/pedal-bin-30-ltr.jpeg" },
+  { "id": 85, "name": "40 Ltr Pedal Bin", "size": "", "stockQty": 150, "unitPrice": 240, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/pedal-bin-40-ltr.png" },
+  { "id": 86, "name": "SS Recycle bin 3 stream Slot cut", "size": "", "stockQty": 90, "unitPrice": 800, "itemCode": "", "category": "Recycle Bin", "imageUrl": "/products/ss-recycle-3-stream-slot-cut.jpeg" },
+  { "id": 87, "name": "SS Recycle Bin 3 Stream", "size": "", "stockQty": 50, "unitPrice": 682, "itemCode": "", "category": "Recycle Bin", "imageUrl": "/products/ss-recycle-3-stream.jpeg" },
+  { "id": 88, "name": "SS 4 Stream Recycle Bin", "size": "", "stockQty": 20, "unitPrice": 936, "itemCode": "", "category": "Recycle Bin", "imageUrl": "/products/ss-recycle-4-stream.jpeg" },
+  { "id": 89, "name": "Swing top", "size": "", "stockQty": 50, "unitPrice": 232, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/swing-top.jpeg" },
+  { "id": 90, "name": "Taurus Bin", "size": "", "stockQty": 66, "unitPrice": 691, "itemCode": "", "category": "Litter Bin", "imageUrl": "/products/taurus-bin.jpeg" }
+]
